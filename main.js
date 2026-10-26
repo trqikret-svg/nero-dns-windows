@@ -23,14 +23,19 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
 
+// اصلاح اسکریپت برای پیدا کردن و اعمال DNS روی تمام کارت‌های شبکه فعال سیستم
 ipcMain.handle('start-vpn', async (event, d1, d2) => {
     return new Promise((resolve) => {
         const script = `
-        $adapter = Get-NetAdapter | Where-Object { $_.Status -eq 'Up' -and $_.InterfaceAlias -notmatch 'Loopback|vEthernet|Virtual|Wsl|Bluetooth' } | Sort-Object InterfaceMetric | Select-Object -First 1
-        if ($adapter) {
-            Set-DnsClientServerAddress -InterfaceIndex $adapter.ifIndex -ServerAddresses ("${d1}","${d2}")
-            Write-Output "SUCCESS"
-        } else { Write-Output "FAIL" }
+        $adapters = Get-NetAdapter | Where-Object { $_.Status -eq 'Up' }
+        $success = $false
+        foreach ($adapter in $adapters) {
+            try {
+                Set-DnsClientServerAddress -InterfaceIndex $adapter.ifIndex -ServerAddresses ("${d1}","${d2}") -ErrorAction Stop
+                $success = $true
+            } catch {}
+        }
+        if ($success) { Write-Output "SUCCESS" } else { Write-Output "FAIL" }
         `;
         exec(`powershell -Command "${script}"`, (error, stdout) => {
             resolve(!error && stdout.includes("SUCCESS"));
@@ -41,11 +46,15 @@ ipcMain.handle('start-vpn', async (event, d1, d2) => {
 ipcMain.handle('stop-vpn', async () => {
     return new Promise((resolve) => {
         const script = `
-        $adapter = Get-NetAdapter | Where-Object { $_.Status -eq 'Up' -and $_.InterfaceAlias -notmatch 'Loopback|vEthernet|Virtual|Wsl|Bluetooth' } | Sort-Object InterfaceMetric | Select-Object -First 1
-        if ($adapter) {
-            Set-DnsClientServerAddress -InterfaceIndex $adapter.ifIndex -ResetServerAddresses
-            Write-Output "SUCCESS"
-        } else { Write-Output "FAIL" }
+        $adapters = Get-NetAdapter | Where-Object { $_.Status -eq 'Up' }
+        $success = $false
+        foreach ($adapter in $adapters) {
+            try {
+                Set-DnsClientServerAddress -InterfaceIndex $adapter.ifIndex -ResetServerAddresses -ErrorAction Stop
+                $success = $true
+            } catch {}
+        }
+        if ($success) { Write-Output "SUCCESS" } else { Write-Output "FAIL" }
         `;
         exec(`powershell -Command "${script}"`, (error, stdout) => {
             resolve(!error && stdout.includes("SUCCESS"));
