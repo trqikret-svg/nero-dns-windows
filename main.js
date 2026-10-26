@@ -26,26 +26,30 @@ app.on('window-all-closed', () => {
 ipcMain.handle('start-vpn', async (event, d1, d2) => {
     return new Promise((resolve) => {
         const script = `
-        $adapter = Get-NetAdapter | Where-Object { $_.Status -eq 'Up' -and $_.MacAddress -ne $null -and $_.InterfaceAlias -notmatch 'vEthernet|Loopback|Virtual' } | Select-Object -First 1
+        $adapter = Get-NetAdapter | Where-Object { $_.Status -eq 'Up' -and $_.InterfaceAlias -notmatch 'Loopback|vEthernet|Virtual|Wsl|Bluetooth' } | Sort-Object InterfaceMetric | Select-Object -First 1
         if ($adapter) {
             Set-DnsClientServerAddress -InterfaceIndex $adapter.ifIndex -ServerAddresses ("${d1}","${d2}")
-            Write-Output "OK"
-        } else { Write-Output "Error" }
+            Write-Output "SUCCESS"
+        } else { Write-Output "FAIL" }
         `;
-        exec(`powershell -Command "${script}"`, (error) => { resolve(!error); });
+        exec(`powershell -Command "${script}"`, (error, stdout) => {
+            resolve(!error && stdout.includes("SUCCESS"));
+        });
     });
 });
 
 ipcMain.handle('stop-vpn', async () => {
     return new Promise((resolve) => {
         const script = `
-        $adapter = Get-NetAdapter | Where-Object { $_.Status -eq 'Up' -and $_.MacAddress -ne $null -and $_.InterfaceAlias -notmatch 'vEthernet|Loopback|Virtual' } | Select-Object -First 1
+        $adapter = Get-NetAdapter | Where-Object { $_.Status -eq 'Up' -and $_.InterfaceAlias -notmatch 'Loopback|vEthernet|Virtual|Wsl|Bluetooth' } | Sort-Object InterfaceMetric | Select-Object -First 1
         if ($adapter) {
             Set-DnsClientServerAddress -InterfaceIndex $adapter.ifIndex -ResetServerAddresses
-            Write-Output "OK"
-        } else { Write-Output "Error" }
+            Write-Output "SUCCESS"
+        } else { Write-Output "FAIL" }
         `;
-        exec(`powershell -Command "${script}"`, (error) => { resolve(!error); });
+        exec(`powershell -Command "${script}"`, (error, stdout) => {
+            resolve(!error && stdout.includes("SUCCESS"));
+        });
     });
 });
 
