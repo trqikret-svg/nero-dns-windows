@@ -23,41 +23,31 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
 
-// اصلاح اسکریپت برای پیدا کردن و اعمال DNS روی تمام کارت‌های شبکه فعال سیستم
+// اضافه شدن ExecutionPolicy Bypass برای جلوگیری از مسدود شدن اسکریپت توسط ویندوز
 ipcMain.handle('start-vpn', async (event, d1, d2) => {
     return new Promise((resolve) => {
-        const script = `
-        $adapters = Get-NetAdapter | Where-Object { $_.Status -eq 'Up' }
-        $success = $false
-        foreach ($adapter in $adapters) {
-            try {
-                Set-DnsClientServerAddress -InterfaceIndex $adapter.ifIndex -ServerAddresses ("${d1}","${d2}") -ErrorAction Stop
-                $success = $true
-            } catch {}
-        }
-        if ($success) { Write-Output "SUCCESS" } else { Write-Output "FAIL" }
-        `;
-        exec(`powershell -Command "${script}"`, (error, stdout) => {
-            resolve(!error && stdout.includes("SUCCESS"));
+        const psCommand = `Get-NetAdapter | Where-Object { $_.Status -eq 'Up' } | ForEach-Object { Set-DnsClientServerAddress -InterfaceIndex $_.ifIndex -ServerAddresses ('${d1}','${d2}') }`;
+        
+        exec(`powershell -ExecutionPolicy Bypass -Command "${psCommand}"`, (error, stdout, stderr) => {
+            if (error) {
+                resolve(false);
+            } else {
+                resolve(true);
+            }
         });
     });
 });
 
 ipcMain.handle('stop-vpn', async () => {
     return new Promise((resolve) => {
-        const script = `
-        $adapters = Get-NetAdapter | Where-Object { $_.Status -eq 'Up' }
-        $success = $false
-        foreach ($adapter in $adapters) {
-            try {
-                Set-DnsClientServerAddress -InterfaceIndex $adapter.ifIndex -ResetServerAddresses -ErrorAction Stop
-                $success = $true
-            } catch {}
-        }
-        if ($success) { Write-Output "SUCCESS" } else { Write-Output "FAIL" }
-        `;
-        exec(`powershell -Command "${script}"`, (error, stdout) => {
-            resolve(!error && stdout.includes("SUCCESS"));
+        const psCommand = `Get-NetAdapter | Where-Object { $_.Status -eq 'Up' } | ForEach-Object { Set-DnsClientServerAddress -InterfaceIndex $_.ifIndex -ResetServerAddresses }`;
+        
+        exec(`powershell -ExecutionPolicy Bypass -Command "${psCommand}"`, (error, stdout, stderr) => {
+            if (error) {
+                resolve(false);
+            } else {
+                resolve(true);
+            }
         });
     });
 });
