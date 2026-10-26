@@ -2,6 +2,7 @@
   "name": "nero-dns-pro",
   "version": "1.0.0",
   "description": "Nero DNS Pro Windows Client",
+  "author": "Nima Ramezani",
   "main": "main.js",
   "scripts": {
     "build": "electron-builder --win"
