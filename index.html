@@ -150,12 +150,33 @@
     const btn = document.getElementById('btnLogin');
     btn.innerText = "در حال بررسی API...";
     
-    if(code.startsWith("DNS-") || code.startsWith("NERO-") || code == "TEST") {
-        document.getElementById('licErr').style.display = 'none';
-        goPage(2);
-    } else {
-        document.getElementById('licErr').style.display = 'block';
-        btn.innerText = "ورود به برنامه";
+    if (window.AndroidBridge) {
+        const apiUrl = window.AndroidBridge.getApiUrl();
+        const formData = new FormData();
+        formData.append('action', 'verify_code');
+        formData.append('code', code);
+        
+        fetch(apiUrl, { method: 'POST', body: formData })
+            .then(res => res.json())
+            .then(data => {
+                if(data.ok) {
+                    document.getElementById('licErr').style.display = 'none';
+                    if(data.days) document.getElementById('daysLeft').innerText = data.days + " روز";
+                    goPage(2);
+                } else {
+                    document.getElementById('licErr').style.display = 'block';
+                    btn.innerText = "ورود به برنامه";
+                }
+            })
+            .catch(() => {
+                if(code.startsWith("DNS-") || code.startsWith("NERO-") || code == "TEST") {
+                    document.getElementById('licErr').style.display = 'none';
+                    goPage(2);
+                } else {
+                    document.getElementById('licErr').style.display = 'block';
+                    btn.innerText = "ورود به برنامه";
+                }
+            });
     }
   }
 
@@ -185,15 +206,28 @@
     stateEl.style.color = "var(--green)";
   }
 
-  function toggleVpn() {
+  async function toggleVpn() {
+    const btnTxt = document.getElementById('btnTxt');
+    
     if (!isConnected) {
-      window.AndroidBridge.startVpn(window.AndroidBridge.getPrimaryDns(), window.AndroidBridge.getSecondaryDns());
+      btnTxt.innerText = "...";
+      const success = await window.AndroidBridge.startVpn(window.AndroidBridge.getPrimaryDns(), window.AndroidBridge.getSecondaryDns());
+      if (success) {
+        setConnectionState(true);
+      } else {
+        alert("خطا: دسترسی ادمین داده نشده یا کارت شبکه فعال یافت نشد!");
+        btnTxt.innerText = "اتصال";
+      }
     } else {
-      window.AndroidBridge.stopVpn();
+      btnTxt.innerText = "...";
+      const success = await window.AndroidBridge.stopVpn();
+      if (success) {
+        setConnectionState(false);
+      }
     }
   }
 
-  window.setConnectionState = function(state) {
+  function setConnectionState(state) {
     isConnected = state;
     const btn = document.getElementById('btnPwr');
     const pulse = document.getElementById('pulse');
