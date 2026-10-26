@@ -1,0 +1,25 @@
+{
+  "name": "nero-dns-pro",
+  "version": "1.0.0",
+  "description": "Nero DNS Pro Windows Client",
+  "main": "main.js",
+  "scripts": {
+    "build": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^29.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.nerodns.windows",
+    "productName": "Nero DNS Pro",
+    "win": {
+      "target": "nsis",
+      "requestedExecutionLevel": "requireAdministrator"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}
