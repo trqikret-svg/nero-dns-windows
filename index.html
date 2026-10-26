@@ -58,7 +58,8 @@
       <span id="netType1">Windows PC</span>
     </div>
     
-    <img src="https://i.postimg.cc/0jWJ2c9j/image-6d7d80.jpg" class="logo-img" alt="Nero Logo">
+    <!-- لود تصویر به صورت لوکال از فایل logo.jpg -->
+    <img src="logo.jpg" class="logo-img" alt="Nero Logo" onerror="this.src='https://i.postimg.cc/0jWJ2c9j/image-6d7d80.jpg'">
     
     <h1>NERO DNS PRO</h1>
     <p class="sub">نسخه ویندوز - لطفا لایسنس را وارد کنید</p>
@@ -73,8 +74,8 @@
 
 <div class="page" id="p2">
   <div class="glass-card" style="padding: 22px; height: 90vh; display: flex; flex-direction: column;">
-    <h1>انتخاب سرور بازی</h1>
-    <input type="text" id="searchBox" class="input-box" placeholder="🔍 جستجوی بازی..." style="margin-bottom: 5px;" oninput="filterGames()">
+    <h1>انتخاب سرور بازی PC</h1>
+    <input type="text" id="searchBox" class="input-box" placeholder="🔍 جستجوی بازی کامپیوتر..." style="margin-bottom: 5px;" oninput="filterGames()">
     <div class="games-container">
       <div class="games" id="gamesList"></div>
     </div>
@@ -121,17 +122,28 @@
   let isConnected = false;
   let pingInterval = null;
 
+  // لیست جامع بازی‌های محبوب کامپیوتر (PC)
   const games = [
-    { name: "Call of Duty", icon: "🎯" }, { name: "EA FC 25", icon: "⚽" },
-    { name: "Valorant", icon: "⚔️" }, { name: "PUBG Mobile", icon: "🪖" },
-    { name: "Counter-Strike 2", icon: "💣" }, { name: "Fortnite", icon: "⚡" },
-    { name: "Apex Legends", icon: "🔥" }, { name: "Rainbow Six", icon: "🛡️" },
-    { name: "Dota 2", icon: "🧙‍♂️" }, { name: "League of Legends", icon: "🔮" },
-    { name: "World of Warcraft", icon: "🐉" }, { name: "Overwatch 2", icon: "🤖" },
-    { name: "Minecraft", icon: "⛏️" }, { name: "Roblox", icon: "🧱" },
-    { name: "Genshin Impact", icon: "🌟" }, { name: "Rocket League", icon: "🚗" },
-    { name: "Rust", icon: "⛺" }, { name: "Escape from Tarkov", icon: "🎒" },
-    { name: "Free Fire", icon: "🔥" }, { name: "Mobile Legends", icon: "📱" }
+    { name: "Counter-Strike 2", icon: "💣" },
+    { name: "Valorant", icon: "⚔️" },
+    { name: "Grand Theft Auto V", icon: "🚗" },
+    { name: "Call of Duty: Warzone", icon: "🪖" },
+    { name: "Dota 2", icon: "🧙‍♂️" },
+    { name: "League of Legends", icon: "🔮" },
+    { name: "Fortnite", icon: "⚡" },
+    { name: "Apex Legends", icon: "🔥" },
+    { name: "Minecraft", icon: "⛏️" },
+    { name: "Rainbow Six Siege", icon: "🛡️" },
+    { name: "Forza Horizon 5", icon: "🏎️" },
+    { name: "Elden Ring", icon: "🗡️" },
+    { name: "Cyberpunk 2077", icon: "🌆" },
+    { name: "Rocket League", icon: "⚽" },
+    { name: "Overwatch 2", icon: "🤖" },
+    { name: "World of Warcraft", icon: "🐉" },
+    { name: "Rust", icon: "⛺" },
+    { name: "EA FC 25", icon: "⚽" },
+    { name: "Battlefield 2042", icon: "🛩️" },
+    { name: "Destiny 2", icon: "🌌" }
   ];
 
   function renderGames(filterText = "") {
