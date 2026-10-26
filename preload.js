@@ -8,7 +8,6 @@ contextBridge.exposeInMainWorld('AndroidBridge', {
     triggerHaptic: () => {}, 
     getNetworkType: () => 'Windows PC',
     getLivePing: (ip) => ipcRenderer.invoke('ping', ip),
-    // اینجا تغییر کرد: حالا مستقیم جواب را به HTML برمی‌گرداند
     startVpn: (d1, d2) => ipcRenderer.invoke('start-vpn', d1, d2),
     stopVpn: () => ipcRenderer.invoke('stop-vpn')
 });
