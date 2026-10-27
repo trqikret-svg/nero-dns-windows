@@ -6,14 +6,12 @@
 <style>
   @import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
 
-  /* تم روشن (پیش‌فرض متغیرها) */
   :root {
     --cyan: #0077b6; --purple: #7209b7; --green: #00b300; --bg: #f8fafc;
     --glass: rgba(255, 255, 255, 0.85); --text-main: #0f172a; --text-sub: #475569;
     --card-border: rgba(0, 119, 182, 0.2); --input-bg: #ffffff; --btn-bg: rgba(0, 0, 0, 0.04);
   }
 
-  /* تم تاریک (فعال‌سازی با دکمه) */
   [data-theme="dark"] {
     --cyan: #00f3ff; --purple: #9d00ff; --green: #00ff9d; --bg: #050711;
     --glass: rgba(12, 18, 36, 0.75); --text-main: #ffffff; --text-sub: #94a3b8;
@@ -50,8 +48,7 @@
   .btn-sec { width: 100%; background: transparent; border: 1px solid var(--purple); color: var(--purple); border-radius: 14px; padding: 14px; font-size: 13px; font-weight: bold; cursor: pointer; }
 
   .games-container { flex: 1; overflow-y: auto; padding-right: 5px; margin-top: 15px; }
-  .games-container::-webkit-scrollbar { width: 4px; }
-  .games-container::-webkit-scrollbar-thumb { background: var(--cyan); border-radius: 10px; }
+  .games-container::-webkit-scrollbar { display: none; }
   .games { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; padding-bottom: 15px; }
   .game-btn { background: var(--btn-bg); border: 1px solid var(--card-border); border-radius: 18px; padding: 15px 5px; color: var(--text-main); text-align: center; cursor: pointer; transition: 0.2s; font-size: 12px; font-weight: bold; display: flex; flex-direction: column; align-items: center; justify-content: center; }
   .game-btn:active { background: rgba(0, 119, 182, 0.1); transform: scale(0.95); }
@@ -68,22 +65,24 @@
   .val { color: var(--cyan); font-family: monospace; font-weight: bold; }
   .ping-badge { background: var(--btn-bg); padding: 5px 12px; border-radius: 12px; font-size: 13px; font-weight: bold; border: 1px solid var(--cyan); color: var(--cyan); }
   
-  /* دکمه‌های کنترل بالا (زبان و تم) */
-  .top-controls { position: absolute; top: 15px; right: 15px; display: flex; gap: 8px; z-index: 10; }
-  .action-btn { background: var(--input-bg); border: 1px solid var(--card-border); color: var(--text-main); padding: 6px 12px; border-radius: 12px; font-size: 12px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+  /* دکمه‌های کنترل بالا */
+  .top-controls { position: fixed; top: 15px; right: 15px; display: flex; gap: 8px; z-index: 100; }
+  .action-btn { background: var(--input-bg); border: 1px solid var(--card-border); color: var(--text-main); padding: 6px 12px; border-radius: 12px; font-size: 12px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: 0.2s; }
+  .action-btn:active { transform: scale(0.95); }
 </style>
 </head>
 <body>
 
 <div class="bg-anim"><div class="orb orb1"></div><div class="orb orb2"></div></div>
 
-<!-- صفحه ۱: ورود -->
+<div class="top-controls">
+    <button class="action-btn" onclick="toggleTheme()" id="themeBtn">☀️</button>
+    <button class="action-btn" onclick="toggleLanguage()">EN / FA</button>
+    <button class="action-btn" onclick="logoutApp()" id="logoutBtn" style="display:none; color:#ff0055; border-color:#ff0055;">خروج</button>
+</div>
+
 <div class="page active" id="p1">
   <div class="glass-card">
-    <div class="top-controls">
-        <button class="action-btn" onclick="toggleTheme()" id="themeBtn">☀️</button>
-        <button class="action-btn" onclick="toggleLanguage()">EN / FA</button>
-    </div>
     <div style="position:absolute; top:18px; left:18px; font-size:11px; color:var(--text-sub); display:flex; align-items:center; gap:4px;">
       <span style="display:inline-block; width:8px; height:8px; background:var(--green); border-radius:50%;"></span>
       <span id="netType1">Windows PC</span>
@@ -97,14 +96,13 @@
     <input type="text" id="lic" class="input-box" placeholder="مثال: NERO-TDXYOX">
     <div id="licErr" style="color:#ff0055; font-size:12px; margin-bottom:12px; display:none;">❌ لایسنس نامعتبر است!</div>
     
-    <button class="btn-main" id="btnLogin" onclick="verifyViaApi()">ورود به برنامه</button>
+    <button class="btn-main" id="btnLogin" onclick="verifyViaApi()">بررسی لایسنس و ورود</button>
     <button class="btn-sec" id="btnBuy" onclick="window.AndroidBridge.openBot()">خرید و تمدید اشتراک</button>
   </div>
 </div>
 
-<!-- صفحه ۲: بازی‌ها -->
 <div class="page" id="p2">
-  <div class="glass-card" style="padding: 22px;">
+  <div class="glass-card" style="padding: 22px; height: 90vh;">
     <h1 id="t_gameTitle">انتخاب سرور بازی PC</h1>
     <input type="text" id="searchBox" class="input-box" placeholder="🔍 جستجوی بازی کامپیوتر..." style="margin-bottom: 5px;" oninput="filterGames()">
     <div class="games-container">
@@ -113,12 +111,11 @@
   </div>
 </div>
 
-<!-- صفحه ۳: ثبت آی‌پی -->
 <div class="page" id="p3">
   <div class="glass-card">
     <h1 id="t_ipTitle">ثبت آی‌پی در فایروال</h1>
     <div class="info-row"><span id="t_ip1">آی‌پی شبکه شما:</span><span id="myIp" class="val">...</span></div>
-    <div class="info-row"><span id="t_ip2">اعتبار اشتراک:</span><span id="daysLeft" class="val" style="color:var(--green);">فعال</span></div>
+    <div class="info-row"><span id="t_ip2">اعتبار اشتراک:</span><span id="daysLeft" class="val" style="color:var(--green);">...</span></div>
     <div class="info-row"><span id="t_ip3">وضعیت رجیستری:</span><span id="ipState" style="color:#ff0055; font-weight:bold;">⚠️ نیاز به ثبت</span></div>
     
     <button class="btn-sec" id="btnReg" style="margin: 22px 0 12px; border-color:var(--cyan); color:var(--cyan);" onclick="registerIpApi()">⚡ ثبت آی‌پی در سرور</button>
@@ -126,7 +123,6 @@
   </div>
 </div>
 
-<!-- صفحه ۴: اتصال -->
 <div class="page" id="p4">
   <div style="text-align:center; height: 100%; display: flex; flex-direction: column; justify-content: center;">
     <div style="display:flex; justify-content:space-between; align-items:center; padding:0 15px;">
@@ -156,7 +152,9 @@
   let pingInterval = null;
   let currentLang = 'fa';
 
-  // سیستم تغییر تم (دستی و خودکار)
+  // برای ویندوز که ویبره ندارد، تابع را خالی قرار می‌دهیم تا ارور ندهد
+  function haptic() {}
+
   function toggleTheme() {
     const html = document.documentElement;
     const isDark = html.getAttribute('data-theme') === 'dark';
@@ -166,21 +164,20 @@
     document.getElementById('themeBtn').innerText = newTheme === 'dark' ? '☀️' : '🌙';
   }
 
-  // سیستم دو زبانه
   const translations = {
     fa: {
       title: "NERO DNS PRO", sub: "نسخه ویندوز - لطفا لایسنس را وارد کنید", placeholder: "مثال: NERO-TDXYOX",
       btnLogin: "بررسی لایسنس و ورود", btnBuy: "خرید و تمدید اشتراک", gameTitle: "انتخاب سرور بازی PC", search: "🔍 جستجوی بازی کامپیوتر...",
       ipTitle: "ثبت آی‌پی در فایروال", ip1: "آی‌پی شبکه شما:", ip2: "اعتبار اشتراک:", ip3: "وضعیت رجیستری:", btnReg: "⚡ ثبت آی‌پی در سرور", btnNext: "تایید و رفتن به رادار",
       radarTitle: "رادار اختصاصی", statusOff: "آماده برقراری تونل گیمینگ", statusOn: "⚡ ترافیک روی سرور فعال است", btnSettings: "تغییر بازی / تنظیمات",
-      connect: "اتصال", connected: "متصل", dir: "rtl"
+      connect: "اتصال", connected: "متصل", btnLogout: "خروج", dir: "rtl"
     },
     en: {
-      title: "NERO DNS PRO", sub: "Windows Edition - Please enter your license key", placeholder: "e.g. NERO-TDXYOX",
+      title: "NERO DNS PRO", sub: "Windows Edition - Enter your license", placeholder: "e.g. NERO-TDXYOX",
       btnLogin: "Verify & Login", btnBuy: "Buy / Renew Subscription", gameTitle: "Select PC Game Server", search: "🔍 Search PC games...",
       ipTitle: "Firewall IP Registry", ip1: "Your Network IP:", ip2: "Subscription:", ip3: "Registry Status:", btnReg: "⚡ Register IP on Server", btnNext: "Confirm & Go to Radar",
       radarTitle: "Gaming Radar", statusOff: "Ready to establish gaming tunnel", statusOn: "⚡ Traffic routed via Nero servers", btnSettings: "Change Game / Settings",
-      connect: "Connect", connected: "Connected", dir: "ltr"
+      connect: "Connect", connected: "Connected", btnLogout: "Logout", dir: "ltr"
     }
   };
 
@@ -206,6 +203,7 @@
     document.getElementById('btnNext').innerText = t.btnNext;
     document.getElementById('t_radarTitle').innerText = t.radarTitle;
     document.getElementById('btnSettings').innerText = t.btnSettings;
+    document.getElementById('logoutBtn').innerText = t.btnLogout;
     
     const btnTxt = document.getElementById('btnTxt');
     if(isConnected) {
@@ -215,6 +213,19 @@
         document.getElementById('statusTxt').innerText = t.statusOff;
         btnTxt.innerText = t.connect;
     }
+  }
+
+  async function logoutApp() {
+      localStorage.removeItem('nero_license');
+      document.getElementById('lic').value = '';
+      document.getElementById('licErr').style.display = 'none';
+      document.getElementById('logoutBtn').style.display = 'none';
+      
+      if (isConnected && window.AndroidBridge) {
+          await window.AndroidBridge.stopVpn();
+          setConnectionState(false);
+      }
+      goPage(1);
   }
 
   const games = [
@@ -230,30 +241,27 @@
     { name: "Battlefield 2042", icon: "🛩️" }, { name: "Destiny 2", icon: "🌌" }
   ];
 
-  function renderGames(filterText = "") {
+  function renderGames(filterText) {
+    if (!filterText) filterText = "";
     const list = document.getElementById('gamesList');
     list.innerHTML = "";
-    const filtered = games.filter(g => g.name.toLowerCase().includes(filterText.toLowerCase()));
-    filtered.forEach(g => {
-      list.innerHTML += `<div class="game-btn" onclick="goPage(3)"><div style="font-size:24px; margin-bottom:5px;">${g.icon}</div><span>${g.name}</span></div>`;
+    const filtered = games.filter(function(g) { return g.name.toLowerCase().includes(filterText.toLowerCase()); });
+    filtered.forEach(function(g) {
+      list.innerHTML += '<div class="game-btn" onclick="goPage(3)"><div style="font-size:24px; margin-bottom:5px;">' + g.icon + '</div><span>' + g.name + '</span></div>';
     });
   }
-  
-  // لود اولیه تنظیمات و لایسنس هنگام باز شدن برنامه
+
   document.addEventListener("DOMContentLoaded", () => {
-      // اعمال تم ذخیره شده
       const savedTheme = localStorage.getItem('nero_theme') || 'dark';
       document.documentElement.setAttribute('data-theme', savedTheme);
       document.getElementById('themeBtn').innerText = savedTheme === 'dark' ? '☀️' : '🌙';
 
-      // نمایش لیست بازی‌ها
       renderGames();
 
-      // بررسی لایسنس ذخیره شده
       const savedLic = localStorage.getItem('nero_license');
       if (savedLic) {
           document.getElementById('lic').value = savedLic;
-          setTimeout(() => { verifyViaApi(); }, 300); // اجرای خودکار پس از لود کوتاه
+          setTimeout(() => { verifyViaApi(); }, 300);
       }
   });
 
@@ -283,6 +291,7 @@
                 if(data.ok) {
                     localStorage.setItem('nero_license', code);
                     document.getElementById('licErr').style.display = 'none';
+                    document.getElementById('logoutBtn').style.display = 'block';
                     if(data.days) document.getElementById('daysLeft').innerText = data.days + (currentLang === 'fa' ? " روز" : " Days");
                     goPage(2);
                 } else {
@@ -295,6 +304,7 @@
                 if(code.startsWith("DNS-") || code.startsWith("NERO-") || code === "TEST") {
                     localStorage.setItem('nero_license', code);
                     document.getElementById('licErr').style.display = 'none';
+                    document.getElementById('logoutBtn').style.display = 'block';
                     goPage(2);
                 } else {
                     localStorage.removeItem('nero_license');
